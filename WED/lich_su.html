@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>He thong Kham suc khoe tu dong</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+        <!--header area start-->
+        <header>
+            <div class="left_area">
+                <h3>HỆ THỐNG <span>KHÁM SỨC KHOẺ</span></h3>
+                <div class="right_area">
+                    <a href="#" class="logout_btn">Logout</a>
+                </div>
+            </div>
+        </header>
+        <!--header area end-->
+        <!--sidebar start-->
+        <div class="sidebar">
+            <a href="do.html"><span>Quay lại</span></a>
+        </div>
+        <!--sidebar end-->
+
+       <div class="content">
+            <input type="text" id="searchInput" class="search-input" onkeyup="search()" placeholder="Tìm bằng CCCD/CMND..." title="Type in a name">
+            <table id="table">
+                <tr class="header">
+                    <th>CCCD/CMND</th>
+                    <th>Họ tên</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Thời gian đo</th>
+                    <th>Nhịp tim</th>
+                    <th>Nồng độ Oxy</th>
+                </tr>
+                <tbody id="rows">
+                    
+                </tbody>
+            </table>
+        </div>
+</body>
+<script>
+    function search() {
+        let keyword = $("#searchInput").val().toUpperCase();
+        let rows = $('tr');
+        $.each(rows, function (i, row) { 
+            let cccd = $(row).find('.cccd').text().toUpperCase();
+            if(cccd.indexOf(keyword) > -1){
+                $(row).show();
+            }
+            else{
+                $(row).hide();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "get",
+            url: "./lay_lich_su_ket_qua.php",
+            dataType: "json",
+            success: function (response) {
+                if(response){
+                    for (const kq of response) {
+                        let row = $(`
+                            <tr>
+                                <td class="cccd">${kq.cccd}</td>
+                                <td class="ho_ten">${kq.ho_ten}</td>
+                                <td class="ngay_sinh">${kq.ngay_sinh}</td>
+                                <td class="gioi_tinh">${kq.gioi_tinh}</td>
+                                <td class="thoi_gian">${(new Date(kq.thoi_gian)).toLocaleString()}</td>
+                                <td class="nhip_tim">${kq.nhip_tim}</td>
+                                <td class="nong_do_oxy">${kq.nong_do_oxy}</td>
+                            </tr>
+                        `)
+                        $('#rows').append(row);
+                    }
+                }
+            },
+            error: function (error) {
+                alert(error);
+            },
+        });
+    });
+</script>
+</html>

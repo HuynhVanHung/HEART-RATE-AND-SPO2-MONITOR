@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hệ Thống Y Tế</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+        <!--header area start-->
+        <header>
+            <div class="left_area">
+                <h3>HỆ THỐNG KHÁM SỨC KHOẺ</h3>
+                <div class="right_area">
+                    <a href="#" class="logout_btn">Logout</a>
+                </div>
+            </div>
+        </header>
+        <!--header area end-->
+        <!--sidebar start-->
+        <div class="sidebar">
+            <a href="index.html"><i class="fas fa-desktop"></i><span>Trang chủ</span></a>
+            <a href="lich_su.html"><i class="fas fa-table"></i><span>Lịch sử đo</span></a>
+        </div>
+        <!--sidebar end-->
+
+       <div class="content">
+            <div class="wrapper">
+                <header>
+                    <h3>Thông Tin y tế</h3>
+                </header>
+                <body>
+                    <form id="form" action="./luu_ket_qua.php" method="post">
+                        <div class="mb-3">
+                            <label for="cccd" class="form-label">CCCD/CMND</label>
+                            <input type="number" class="form-control" name="cccd" id="cccd" required>
+                            <div id="ghichu" class="form-text">Thong tin cua ban se duoc bao mat.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hoTen" class="form-label">Họ Tên</label>
+                            <input type="text" class="form-control" name="ho_ten" id="hoTen" required>
+                            <div id="ghichu" class="form-text">Thong tin cua ban se duoc bao mat.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ngaySinh" class="form-label">Ngày Sinh</label>
+                            <input type="date" class="form-control" name="ngay_sinh" id="ngaySinh" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giới Tính </label>
+                        </div>
+                        <div class="mb-3 form-check form-check-inline">
+                            <input type="radio" class="form-check-input mt-0" name="gioi_tinh" id="gtinh1" value="nam" required>
+                            <label class="form-check-label" for="gtinh1"> Nam </label>
+                        </div>
+                        <div class="mb-3 form-check form-check-inline">    
+                            <input type="radio" class="form-check-input mt-0" name="gioi_tinh" id="gtinh2" value="nu" required>
+                            <label class="form-check-label" for="gtinh2"> Nữ </label>
+                        </div>
+                        <div id="measured-values" style="display: none">   
+                            <div class="mt-3 row">
+                                <div  class="col-5">
+                                    <label class="form-label">Nhịp tim : </label>
+                                </div>
+                                <div  class="col-7">
+                                    <input id="nhipTim" type="text" class="form-control" name="nhip_tim" readonly required placeholder="chờ kết quả..." >
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div  class="col-5">
+                                    <label class="form-label">Nồng độ Oxy :</label>
+                                </div>
+                                <div  class="col-7">
+                                    <input id="nongDoOxy" type="text" class="form-control" name="nong_do_oxy" readonly required placeholder="chờ kết quả...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" id="startBtn" class="btn btn-primary float-left">Bắt đầu</button>
+                            <button type="submit" id="saveBtn" class="btn btn-success float-right" style="display: none;" disabled>Lưu Kết quả</button>
+                        </div>
+                    </form>
+                </body>    
+            </div>
+            <div class="wrapper1">
+                <header>
+                    <h4> Kết quả đo gần nhất </h4>
+                </header>
+                
+                <body>
+                    <table class="table">
+                        <tr>
+                            <th scope="col">CCCD/CMND</th> 
+                            <td id="cccdMoiNhat">  </td>   
+                        </tr>
+                        <tr>
+                            <th scope="col">Họ Tên</th> 
+                            <td id="hoTenMoiNhat">  </td>   
+                        </tr>
+                        <tr>
+                            <th scope="col">Ngày Sinh</th> 
+                            <td id="ngaySinhMoiNhat">  </td>   
+                        </tr>
+                        <tr>
+                            <th scope="col">Giới tính</th> 
+                            <td id="gioiTinhMoiNhat"> </td>   
+                        </tr>
+                        <tr>
+                            <th scope="col">Nhịp tim</th> 
+                            <td id="nhipTimMoiNhat"> </td> 
+                        </tr>
+                        <tr>
+                            <th scope="col">Nòng độ Oxy</th> 
+                            <td id="nongDoOxyMoiNhat"> </td>
+                        </tr>
+                        <tr>
+                            <th scope="col">Thời gian đo</th> 
+                            <td id="thoiGianMoiNhat"> </td>
+                        </tr>
+                    </table>
+                </body>
+            </div>
+            <div class="bang border border-3 rounded border-primary">
+                <h3>HR AND SPO2</h3>
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+</body>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
+<script>
+
+    var dangDo = false;
+    var url = new URL(location.href);
+    $(document).ready(function () {
+        // lay ket qua gan nhat
+        $.ajax({
+            type: "get",
+            url: "./lay_ket_qua_gan_nhat.php",
+            dataType: "json",
+            success: function (response) {
+                if(response){
+                    $('#cccdMoiNhat').text(response.cccd);
+                    $('#hoTenMoiNhat').text(response.ho_ten);
+                    $('#ngaySinhMoiNhat').text(response.ngay_sinh);
+                    $('#gioiTinhMoiNhat').text(response.gioi_tinh);
+                    $('#nhipTimMoiNhat').text(response.nhip_tim);
+                    $('#nongDoOxyMoiNhat').text(response.nong_do_oxy);
+                    $('#thoiGianMoiNhat').text((new Date(response.thoi_gian)).toLocaleString());
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            },
+        });
+
+        //check cccd
+        $('#cccd').keypress(function(e) {
+            if(e.which == 13) {
+                $('#form').find('input').prop('disabled', true);
+                let cccd = $(this).val();
+                $.ajax({
+                    type: "get",
+                    url: "./lay_thong_tin_benh_nhan.php?cccd=" + cccd,
+                    dataType: "json",
+                    success: function (data) {
+                        if(data){
+                            $('#hoTen').val(data.ho_ten);
+                            $('#ngaySinh').val(data.ngay_sinh);
+                            $('input:radio').prop('checked', false);
+                            $('input[type="radio"][value="'+data.gioi_tinh+'"]').prop('checked', true);
+                            $('#form').find('input').prop('disabled', false);
+                        }
+                        else{
+                            $('#form').find('input').prop('disabled', false);
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        $('#form').find('input').prop('disabled', false);
+                    },
+                });
+            }
+        });
+
+        $('#startBtn').click(()=>{
+            $('#startBtn').prop('disabled', true);
+
+            // goi file php de xu ly
+            $.ajax({
+                type: "post",
+                url: "./xoa_cac_thong_so_do_cu.php",
+                dataType: "json",
+                success: function () {
+                    $('#startBtn').hide();
+                    $('#saveBtn').show();
+                    $('#measured-values').show('fast');
+                    dangDo = true;
+                },
+                error: function (error) {
+                    alert(error);
+                },
+            });
+        });
+    });
+
+    setInterval(function () {
+        if(dangDo){
+            $.ajax({
+                type: "post",
+                url: "./lay_thong_so_do_moi.php" ,
+                dataType: "json",
+                success: function (data) {
+                    if(data){
+                        $('#saveBtn').prop('disabled', false);
+                        $('#nhipTim').val(data.nhip_tim);
+                        $('#nongDoOxy').val(data.nong_do_oxy);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+    }, 500);
+    
+</script>
+
+<!-- ve do thi -->
+<script>
+    var label = [];
+    var hr = [];
+    var spo2 = [];
+    
+    const chartdata = {
+        labels: label,
+            datasets: [ 
+                {
+                    label: 'HR',
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: hr
+                },
+                {
+                    label: 'SPO2',
+                    backgroundColor: 'rgb(99, 255, 132)',
+                    borderColor: 'rgb(99, 255, 132)',
+                    data: spo2
+                }
+            ]
+    };
+
+    const config = {      
+        type: 'line',
+        data: chartdata,
+        options: {
+            animation:false
+        }
+    };
+
+    var myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+    );
+
+    // load data tu database
+    $(document).ready(function(){
+        updateChart();
+    });
+
+    setInterval(updateChart,1000);
+
+    function updateChart(){
+        $.ajax({
+            type: "get",
+            url: "./lay_du_lieu_thong_so_do.php",
+            dataType: "json",
+            success: function (data) {
+                let label = [];
+                let hr = [];
+                let spo2 = [];
+            
+                for(var i in data){
+                    label.push(data[i].id);
+                    hr.push(data[i].nhip_tim);
+                    spo2.push(data[i].nong_do_oxy);
+                }
+
+                myChart.data.labels = label;
+                myChart.data.datasets[0].data = hr;
+                myChart.data.datasets[1].data = spo2;
+                myChart.update();
+            },
+            error: function (error) {
+                console.log(error);
+            },
+        });
+    }
+</script>  
+</html>
